@@ -3,7 +3,7 @@ package main;
 import checker.Checkstyle;
 import checker.Checker;
 import common.Constants;
-import entities.Database;
+import homework.Database;
 import fileio.Input;
 import fileio.InputLoader;
 import fileio.Writer;
@@ -74,7 +74,7 @@ public final class Main {
         //TODO add here the entry point to your implementation
 
         Database database = new Database(input);
-        database.startCommands(fileWriter, arrayResult);
+        database.start(fileWriter, arrayResult);
 
         fileWriter.closeJSON(arrayResult);
     }

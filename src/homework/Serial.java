@@ -1,6 +1,5 @@
-package entities;
+package homework;
 
-import entertainment.Genre;
 import entertainment.Season;
 import fileio.SerialInputData;
 

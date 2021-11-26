@@ -1,4 +1,4 @@
-package entities;
+package homework;
 
 import actor.ActorsAwards;
 import fileio.ActorInputData;

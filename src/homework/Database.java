@@ -1,13 +1,11 @@
-package entities;
+package homework;
 
 import common.Constants;
 import fileio.*;
 import org.json.simple.JSONArray;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 public class Database {
@@ -48,7 +46,7 @@ public class Database {
         return input;
     }
 
-    public void startCommands (Writer fileWriter, JSONArray arrayResult) throws IOException {
+    public void start(Writer fileWriter, JSONArray arrayResult) throws IOException {
         for (ActionInputData action : this.input.getCommands()) {
             switch (action.getActionType()) {
                 case Constants.COMMAND:
@@ -61,18 +59,23 @@ public class Database {
                     }
 
                     if(Objects.equals(action.getType(), "favorite")) {
-                        int res = command.favorite(command.getUsername(), command.getVideoTitle(), this);
-                        if (res == 2) { // a fost adaugat in lista
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","success -> " +
-                                    action.getTitle() + " was added as favourite"));
-                        } else if (res == 1) { // este deja in lista
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","error -> " +
-                                    action.getTitle() + " is already in favourite list"));
-                        } else if (res == 0) { // nu a fost vizionat
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","error -> " +
-                                    action.getTitle() + " is not seen"));
-                        }
+                        arrayResult.add(fileWriter.writeFile(action.getActionId(),"", command.favorite(
+                                command.getUsername(), command.getVideoTitle(), this)));
                     }
+
+                    if(Objects.equals(action.getType(), "rating")) {
+                        if (action.getSeasonNumber() != 0) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    command.rateSerial(command.getUsername(), command.getVideoTitle(),
+                                            action.getGrade(), action.getSeasonNumber(), this)));
+                        } else {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    command.rateMovie(command.getUsername(), command.getVideoTitle(), action.getGrade(),
+                                            this)));
+                        }
+
+                    }
+
             }
 
         }

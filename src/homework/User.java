@@ -1,4 +1,4 @@
-package entities;
+package homework;
 
 import fileio.UserInputData;
 
@@ -11,12 +11,17 @@ public class User {
     private String subscriptionType;
     private Map<String, Integer> history;
     private ArrayList<String> favoriteMovies;
+    private ArrayList<String> ratedMovies;
+    private Map<String, ArrayList<Integer>> ratedSerials;
+
 
     public User(UserInputData user) {
         this.username = user.getUsername();
         this.subscriptionType = user.getSubscriptionType();
         this.history = user.getHistory();
         this.favoriteMovies = user.getFavoriteMovies();
+        this.ratedMovies = new ArrayList<>();
+        this.ratedSerials = new HashMap<>();
     }
 
     public String getUsername() {
@@ -34,4 +39,12 @@ public class User {
     public ArrayList<String> getFavoriteMovies() {
         return favoriteMovies;
     }
+
+    public ArrayList<String> getRatedMovies() {
+        return ratedMovies;
+    }
+    public Map<String, ArrayList<Integer>> getRatedSerials() {
+        return ratedSerials;
+    }
+
 }
