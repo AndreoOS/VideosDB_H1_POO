@@ -15,6 +15,23 @@ public class Serial extends Video {
         seasons = serial.getSeasons();
     }
 
+    public Double getSerialRating (){
+        Double serialRating = 0.0;
+        for (Season s : seasons) {
+            Double seasonRating = 0.0;
+            for (Double rating : s.getRatings()) {
+                    seasonRating = seasonRating + rating;
+            }
+            if (!s.getRatings().isEmpty()) {
+                seasonRating = seasonRating / s.getRatings().size();
+            }
+            serialRating = serialRating + seasonRating;
+        }
+        serialRating = serialRating / numberOfSeasons;
+
+        return serialRating;
+    }
+
     public int getNumberOfSeasons() {
         return numberOfSeasons;
     }

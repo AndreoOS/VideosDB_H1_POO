@@ -50,7 +50,7 @@ public class Database {
         for (ActionInputData action : this.input.getCommands()) {
             switch (action.getActionType()) {
                 case Constants.COMMAND:
-                    Commands command = new Commands(action.getUsername(), action.getTitle());
+                    Commands command = new Commands(action);
                     if (Objects.equals(action.getType(), "view")) {
                         command.view(command.getUsername(), command.getVideoTitle(), this);
                         arrayResult.add(fileWriter.writeFile(action.getActionId(), "", "success -> " +
@@ -74,6 +74,19 @@ public class Database {
                                             this)));
                         }
 
+                    }
+                case Constants.QUERY:
+                    Queries query = new Queries(action);
+                    if (Objects.equals(query.objectType, Constants.ACTORS)) {
+                        if (query.criteria.equals("average")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: " +
+                                    query.averageQuery(this)));
+                        } else if (query.criteria.equals("awards")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
+                            + query.awardQuery(this)));
+                        } else if (query.criteria.equals("filter_description")) {
+
+                        }
                     }
 
             }

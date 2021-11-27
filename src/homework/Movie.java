@@ -14,6 +14,17 @@ public class Movie extends Video {
         ratings = new ArrayList<>();
     }
 
+    public Double getMovieRating() {
+        Double average = 0.0;
+        for (Double rating : ratings) {
+            average = average + rating;
+        }
+        if (!ratings.isEmpty()) {
+            average = average / ratings.size();
+        }
+        return average;
+    }
+
     public int getDuration() {
         return duration;
     }

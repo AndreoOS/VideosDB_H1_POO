@@ -1,13 +1,15 @@
 package homework;
 
+import fileio.ActionInputData;
+
 import java.util.ArrayList;
 
 public class Commands {
     private String username;
     private String videoTitle;
-    public Commands(String username, String videoTitle) {
-        this.username = username;
-        this.videoTitle = videoTitle;
+    public Commands(ActionInputData action) {
+        this.username = action.getUsername();
+        this.videoTitle = action.getTitle();
     }
 
     public void view (String username, String videoTitle, Database db) {
@@ -38,7 +40,7 @@ public class Commands {
     public String rateMovie(String username, String videoTitle, Double rating, Database db) {
         if(db.getUserMap().get(username).getHistory().containsKey(videoTitle)) {
             if(db.getUserMap().get(username).getRatedMovies().contains(videoTitle)) {
-                return "error -> " + videoTitle + " was already rated";
+                return "error -> " + videoTitle + " has been already rated";
             } else {
                 db.getMovieMap().get(videoTitle).getRatings().add(rating);
                 db.getUserMap().get(username).getRatedMovies().add(videoTitle);
