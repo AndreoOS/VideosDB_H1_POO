@@ -3,6 +3,7 @@ package main;
 import checker.Checkstyle;
 import checker.Checker;
 import common.Constants;
+import homework.Database;
 import fileio.Input;
 import fileio.InputLoader;
 import fileio.Writer;
@@ -71,6 +72,9 @@ public final class Main {
         JSONArray arrayResult = new JSONArray();
 
         //TODO add here the entry point to your implementation
+
+        Database database = new Database(input);
+        database.start(fileWriter, arrayResult);
 
         fileWriter.closeJSON(arrayResult);
     }
