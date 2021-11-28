@@ -7,19 +7,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class User {
-    private String username;
-    private String subscriptionType;
-    private Map<String, Integer> history;
-    private ArrayList<String> favoriteMovies;
-    private ArrayList<String> ratedMovies;
-    private Map<String, ArrayList<Integer>> ratedSerials;
+    private final String username;
+    private final String subscriptionType;
+    private final Map<String, Integer> history;
+    private final ArrayList<String> favoriteVideos;
+    private final ArrayList<String> ratedMovies;
+    private final Map<String, ArrayList<Integer>> ratedSerials;
 
 
     public User(UserInputData user) {
         this.username = user.getUsername();
         this.subscriptionType = user.getSubscriptionType();
         this.history = user.getHistory();
-        this.favoriteMovies = user.getFavoriteMovies();
+        this.favoriteVideos = user.getFavoriteMovies();
         this.ratedMovies = new ArrayList<>();
         this.ratedSerials = new HashMap<>();
     }
@@ -36,8 +36,8 @@ public class User {
         return history;
     }
 
-    public ArrayList<String> getFavoriteMovies() {
-        return favoriteMovies;
+    public ArrayList<String> getFavoriteVideos() {
+        return favoriteVideos;
     }
 
     public ArrayList<String> getRatedMovies() {

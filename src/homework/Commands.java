@@ -22,13 +22,13 @@ public class Commands {
     }
     public String favorite(String username, String videoTitle, Database db) {
         if (db.getUserMap().get(username).getHistory().containsKey(videoTitle)) {
-            for (String movieTitle : db.getUserMap().get(username).getFavoriteMovies()) {
+            for (String movieTitle : db.getUserMap().get(username).getFavoriteVideos()) {
                 if (movieTitle.equals(videoTitle)) {
                     // este deja in lista de favorite
                     return "error -> " + videoTitle + " is already in favourite list";
                 }
             }
-            db.getUserMap().get(username).getFavoriteMovies().add(videoTitle);
+            db.getUserMap().get(username).getFavoriteVideos().add(videoTitle);
             // a fost adaugat cu succes in lista de favorite
             return "success -> " + videoTitle + " was added as favourite";
         }
@@ -47,7 +47,7 @@ public class Commands {
                 return "success -> " + videoTitle + " was rated with " + rating + " by " + username;
             }
         }
-        return "error -> " + videoTitle + " was not seen";
+        return "error -> " + videoTitle + " is not seen";
     }
 
     public String rateSerial(String username, String videoTitle, Double rating, Integer seasonNum, Database db) {
@@ -66,7 +66,7 @@ public class Commands {
             }
             return "success -> " + videoTitle + " was rated with " + rating + " by " + username;
         }
-        return "error -> " + videoTitle + " was not seen";
+        return "error -> " + videoTitle + " is not seen";
     }
 
     public String getUsername() {

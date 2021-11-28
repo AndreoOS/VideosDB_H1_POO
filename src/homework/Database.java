@@ -77,15 +77,35 @@ public class Database {
                     }
                 case Constants.QUERY:
                     Queries query = new Queries(action);
-                    if (Objects.equals(query.objectType, Constants.ACTORS)) {
-                        if (query.criteria.equals("average")) {
+                    if (Objects.equals(query.getObjectType(), Constants.ACTORS)) {
+                        if (query.getCriteria().equals("average")) {
                             arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: " +
                                     query.averageQuery(this)));
-                        } else if (query.criteria.equals("awards")) {
+                        } else if (query.getCriteria().equals("awards")) {
                             arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
                             + query.awardQuery(this)));
-                        } else if (query.criteria.equals("filter_description")) {
-
+                        } else if (query.getCriteria().equals("filter_description")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
+                                    + query.filterQuery(this)));
+                        }
+                    } else if (Objects.equals(query.getObjectType(), Constants.MOVIES)) {
+                        if (query.getCriteria().equals("ratings")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: "
+                            + query.movieRatingQuery(this)));
+                        } else if (query.getCriteria().equals("favorite")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
+                                            + query.favoriteMovieQuery(this)));
+                        }else if (query.getCriteria().equals("longest")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "", "Query result: "
+                            + query.longestMovieQuery(this)));
+                        } else if (query.getCriteria().equals("most_viewed")) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "", "Query result: "
+                                    + query.mostViewedMovieQuery(this)));
+                        }
+                    } else if (Objects.equals(query.getObjectType(), Constants.SHOWS)) {
+                        if (query.getCriteria().equals("ratings")) {
+                           arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: "
+                                    + query.showRatingQuery(this)));
                         }
                     }
 

@@ -25,6 +25,16 @@ public class Movie extends Video {
         return average;
     }
 
+    public Integer getMovieViews(Database db) {
+        Integer totalViews = 0;
+        for (User user : db.getUserMap().values()) {
+            if (user.getHistory().containsKey(this.getTitle())) {
+                totalViews = totalViews + user.getHistory().get(this.getTitle());
+            }
+        }
+        return totalViews;
+    }
+
     public int getDuration() {
         return duration;
     }
