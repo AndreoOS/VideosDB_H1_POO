@@ -32,6 +32,14 @@ public class Serial extends Video {
         return serialRating;
     }
 
+    public Integer getSerialDuration (){
+        int duration = 0;
+        for (Season s : this.getSeasons()) {
+            duration = duration + s.getDuration();
+        }
+        return duration;
+    }
+
     public int getNumberOfSeasons() {
         return numberOfSeasons;
     }

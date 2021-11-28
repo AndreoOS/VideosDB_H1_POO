@@ -17,7 +17,7 @@ public class Video {
         genres = video.getGenres();
     }
 
-    public boolean hasFilters(Queries q) {
+    public boolean hasFilters(Query q) {
         int genreCount = 0;
         if (q.getFilters().get(0).get(0) != null) {
             if (Integer.parseInt(q.getFilters().get(0).get(0)) != this.getReleaseYear()) {
@@ -51,6 +51,16 @@ public class Video {
             }
         }
         return result;
+    }
+
+    public Integer getViews(Database db) {
+        Integer totalViews = 0;
+        for (User user : db.getUserMap().values()) {
+            if (user.getHistory().containsKey(this.getTitle())) {
+                totalViews = totalViews + user.getHistory().get(this.getTitle());
+            }
+        }
+        return totalViews;
     }
 
     public String getTitle() {

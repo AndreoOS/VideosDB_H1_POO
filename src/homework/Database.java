@@ -10,10 +10,10 @@ import java.util.Objects;
 
 public class Database {
     private Input input;
-    private HashMap<String, Movie> movieMap;
-    private HashMap<String, Serial> serialMap;
-    private HashMap<String, User> userMap;
-    private HashMap<String, Actor> actorMap;
+    private final HashMap<String, Movie> movieMap;
+    private final HashMap<String, Serial> serialMap;
+    private final HashMap<String, User> userMap;
+    private final HashMap<String, Actor> actorMap;
 
     private Database() {
         this.movieMap = new HashMap<>();
@@ -46,11 +46,12 @@ public class Database {
         return input;
     }
 
+    @SuppressWarnings("unchecked")
     public void start(Writer fileWriter, JSONArray arrayResult) throws IOException {
         for (ActionInputData action : this.input.getCommands()) {
             switch (action.getActionType()) {
                 case Constants.COMMAND:
-                    Commands command = new Commands(action);
+                    Command command = new Command(action);
                     if (Objects.equals(action.getType(), "view")) {
                         command.view(command.getUsername(), command.getVideoTitle(), this);
                         arrayResult.add(fileWriter.writeFile(action.getActionId(), "", "success -> " +
@@ -76,38 +77,54 @@ public class Database {
 
                     }
                 case Constants.QUERY:
-                    Queries query = new Queries(action);
+                    Query query = new Query(action);
                     if (Objects.equals(query.getObjectType(), Constants.ACTORS)) {
-                        if (query.getCriteria().equals("average")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: " +
+                        switch (query.getCriteria()) {
+                            case "average" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: " +
                                     query.averageQuery(this)));
-                        } else if (query.getCriteria().equals("awards")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
-                            + query.awardQuery(this)));
-                        } else if (query.getCriteria().equals("filter_description")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
+                            case "awards" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                    + query.awardQuery(this)));
+                            case "filter_description" -> arrayResult.add(fileWriter.writeFile(action.getActionId(),
+                                    "", "Query result: "
                                     + query.filterQuery(this)));
                         }
                     } else if (Objects.equals(query.getObjectType(), Constants.MOVIES)) {
-                        if (query.getCriteria().equals("ratings")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: "
-                            + query.movieRatingQuery(this)));
-                        } else if (query.getCriteria().equals("favorite")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "","Query result: "
-                                            + query.favoriteMovieQuery(this)));
-                        }else if (query.getCriteria().equals("longest")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "", "Query result: "
-                            + query.longestMovieQuery(this)));
-                        } else if (query.getCriteria().equals("most_viewed")) {
-                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "", "Query result: "
+                        switch (query.getCriteria()) {
+                            case "ratings" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                    + query.movieRatingQuery(this)));
+                            case "favorite" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                    + query.favoriteMovieQuery(this)));
+                            case "longest" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                    + query.longestMovieQuery(this)));
+                            case "most_viewed" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
                                     + query.mostViewedMovieQuery(this)));
                         }
                     } else if (Objects.equals(query.getObjectType(), Constants.SHOWS)) {
-                        if (query.getCriteria().equals("ratings")) {
-                           arrayResult.add(fileWriter.writeFile(action.getActionId(),"","Query result: "
-                                    + query.showRatingQuery(this)));
+                        switch (query.getCriteria()) {
+                            case "ratings" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                            + query.showRatingQuery(this)));
+                            case "favorite" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                            + query.favoriteShowQuery(this)));
+                            case "longest" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                            + query.longestShowQuery(this)));
+                            case "most_viewed" -> arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "Query result: "
+                                            + query.mostViewedShowQuery(this)));
                         }
+                    } else if (Objects.equals(query.getObjectType(), "users")) {
+                        arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                "Query result: " + query.activeUsersQuery(this)));
                     }
+
 
             }
 

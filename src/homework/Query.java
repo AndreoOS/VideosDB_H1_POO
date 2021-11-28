@@ -4,14 +4,14 @@ import fileio.ActionInputData;
 
 import java.util.*;
 
-public class Queries {
-    private String objectType;
-    private Integer number;
-    private List<List<String>> filters;
-    private String sortType;
-    private String criteria;
+public class Query {
+    private final String objectType;
+    private final Integer number;
+    private final List<List<String>> filters;
+    private final String sortType;
+    private final String criteria;
 
-    public Queries(ActionInputData action) {
+    public Query(ActionInputData action) {
         this.objectType = action.getObjectType();
         this.number = action.getNumber();
         this.filters = action.getFilters();
@@ -21,7 +21,7 @@ public class Queries {
 
     public List<String> averageQuery(Database db) {
         List<String> actorsList = new ArrayList<>();
-        Integer size = 0;
+        int size = 0;
         Map<String, Double> unsorted = new HashMap<>();
         for (Map.Entry<String, Actor> entry : db.getActorMap().entrySet()) {
             unsorted.put(entry.getKey(), entry.getValue().getAverage(db.getMovieMap(), db.getSerialMap()));
@@ -40,21 +40,18 @@ public class Queries {
 
     private Map<String, Double> sortByValue(Map<String, Double> unsorted) {
         List<Map.Entry<String, Double>> list = new LinkedList<>(unsorted.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<String, Double>>() {
-            @Override
-            public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
-                if (sortType.equals("asc")) {
-                    if (Double.compare(o1.getValue(), o2.getValue()) == 0) {
-                        return o1.getKey().compareTo(o2.getKey());
-                    } else {
-                       return o1.getValue().compareTo(o2.getValue());
-                    }
+        list.sort((o1, o2) -> {
+            if (sortType.equals("asc")) {
+                if (Double.compare(o1.getValue(), o2.getValue()) == 0) {
+                    return o1.getKey().compareTo(o2.getKey());
                 } else {
-                    if (Double.compare(o1.getValue(), o2.getValue()) == 0) {
-                        return o2.getKey().compareTo(o1.getKey());
-                    } else {
-                        return o2.getValue().compareTo(o1.getValue());
-                    }
+                    return o1.getValue().compareTo(o2.getValue());
+                }
+            } else {
+                if (Double.compare(o1.getValue(), o2.getValue()) == 0) {
+                    return o2.getKey().compareTo(o1.getKey());
+                } else {
+                    return o2.getValue().compareTo(o1.getValue());
                 }
             }
         });
@@ -96,7 +93,7 @@ public class Queries {
 
 
     public List<String> movieRatingQuery(Database db) {
-        Integer size = 0;
+        int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
         for(Movie movie : db.getMovieMap().values()) {
@@ -132,7 +129,7 @@ public class Queries {
     }
 
     public List<String> showRatingQuery(Database db) {
-        Integer size = 0;
+        int size = 0;
         List<String> showStringList = new ArrayList<>();
         List<Serial> showList = new ArrayList<>();
         for (Serial serial : db.getSerialMap().values()) {
@@ -169,7 +166,7 @@ public class Queries {
     }
 
     public List<String> favoriteMovieQuery(Database db) {
-        Integer size = 0;
+        int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
         for (Movie movie : db.getMovieMap().values()) {
@@ -180,13 +177,13 @@ public class Queries {
         List<Movie> sortedMovieList = movieList.stream()
                 .sorted((o1, o2) -> {
                     if (sortType.equals("asc")) {
-                        if (o1.getNumberOfFavorites(db) == o2.getNumberOfFavorites(db)) {
+                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
                             return o1.getTitle().compareTo(o2.getTitle());
                         } else {
                             return o1.getNumberOfFavorites(db).compareTo(o2.getNumberOfFavorites(db));
                         }
                     } else {
-                        if (Double.compare(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db)) == 0) {
+                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
                             return o2.getTitle().compareTo(o1.getTitle());
                         } else {
                             return o2.getNumberOfFavorites(db).compareTo(o1.getNumberOfFavorites(db));
@@ -205,7 +202,7 @@ public class Queries {
     }
 
     public List<String> longestMovieQuery(Database db) {
-        Integer size = 0;
+        int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
         for (Movie movie : db.getMovieMap().values()) {
@@ -242,27 +239,27 @@ public class Queries {
     }
 
     public List<String> mostViewedMovieQuery(Database db) {
-        Integer size = 0;
+        int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
         for (Movie movie : db.getMovieMap().values()) {
-            if (movie.hasFilters(this) && movie.getMovieViews(db) != 0) {
+            if (movie.hasFilters(this) && movie.getViews(db) != 0) {
                 movieList.add(movie);
             }
         }
         List<Movie> sortedMovieList = movieList.stream()
                 .sorted((o1, o2) -> {
                     if (sortType.equals("asc")) {
-                        if (o1.getMovieViews(db) == o2.getMovieViews(db)) {
+                        if (Objects.equals(o1.getViews(db), o2.getViews(db))) {
                             return o1.getTitle().compareTo(o2.getTitle());
                         } else {
-                            return Integer.compare(o1.getMovieViews(db), o2.getMovieViews(db));
+                            return Integer.compare(o1.getViews(db), o2.getViews(db));
                         }
                     } else {
-                        if (o1.getMovieViews(db) == o2.getMovieViews(db)) {
+                        if (Objects.equals(o1.getViews(db), o2.getViews(db))) {
                             return o2.getTitle().compareTo(o1.getTitle());
                         } else {
-                            return Integer.compare(o2.getMovieViews(db), o1.getMovieViews(db));
+                            return Integer.compare(o2.getViews(db), o1.getViews(db));
                         }
                     }
                 }).toList();
@@ -275,6 +272,154 @@ public class Queries {
             }
         }
         return movieStringList;
+    }
+
+    public List<String> favoriteShowQuery(Database db) {
+        int size = 0;
+        List<String> showStringList = new ArrayList<>();
+        List<Serial> showList = new ArrayList<>();
+        for (Serial serial : db.getSerialMap().values()) {
+            if (serial.getNumberOfFavorites(db) != 0 && serial.hasFilters(this)) {
+                showList.add(serial);
+            }
+        }
+        List<Serial> sortedShowList = showList.stream()
+                .sorted((o1, o2) -> {
+                    if (sortType.equals("asc")) {
+                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
+                            return o1.getTitle().compareTo(o2.getTitle());
+                        } else {
+                            return Integer.compare(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db));
+                        }
+                    } else {
+                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
+                            return o1.getTitle().compareTo(o2.getTitle());
+                        } else {
+                            return Integer.compare(o2.getNumberOfFavorites(db), o1.getNumberOfFavorites(db));
+                        }
+                    }
+
+                }).toList();
+        for (Serial serial : sortedShowList) {
+            if (size < number) {
+                showStringList.add(serial.getTitle());
+                size++;
+            } else {
+                break;
+            }
+        }
+        return showStringList;
+
+    }
+
+    public List<String> longestShowQuery(Database db) {
+        int size = 0;
+        List<String> showStringList = new ArrayList<>();
+        List<Serial> showList = new ArrayList<>();
+        for (Serial serial : db.getSerialMap().values()) {
+            if (serial.getNumberOfFavorites(db) != 0 && serial.hasFilters(this)) {
+                showList.add(serial);
+            }
+        }
+        List<Serial> sortedShowList = showList.stream()
+                .sorted((o1, o2) -> {
+                    if (this.getSortType().equals("asc")) {
+                        if (Objects.equals(o1.getSerialDuration(), o2.getSerialDuration())) {
+                            return o1.getTitle().compareTo(o2.getTitle());
+                        } else {
+                            return Integer.compare(o1.getSerialDuration(), o2.getSerialDuration());
+                        }
+                    } else {
+                        if (Objects.equals(o1.getSerialDuration(), o2.getSerialDuration())) {
+                            return o1.getTitle().compareTo(o2.getTitle());
+                        } else {
+                            return Integer.compare(o2.getSerialDuration(), o1.getSerialDuration());
+                        }
+                    }
+
+                }).toList();
+        for (Serial serial : sortedShowList) {
+            if (size < number) {
+                showStringList.add(serial.getTitle());
+                size++;
+            } else {
+                break;
+            }
+        }
+        return showStringList;
+    }
+
+    public List<String> mostViewedShowQuery(Database db) {
+        int size = 0;
+        List<String> showStringList = new ArrayList<>();
+        List<Serial> showList = new ArrayList<>();
+        for (Serial serial : db.getSerialMap().values()) {
+            if (serial.getNumberOfFavorites(db) != 0 && serial.hasFilters(this)) {
+                showList.add(serial);
+            }
+        }
+        List<Serial> sortedShowList = showList.stream()
+                .sorted((o1, o2) -> {
+                    if (this.getSortType().equals("asc")) {
+                        if (Objects.equals(o1.getViews(db), o2.getViews(db))) {
+                            return o1.getTitle().compareTo(o2.getTitle());
+                        } else {
+                            return Integer.compare(o1.getViews(db), o2.getViews(db));
+                        }
+                    } else {
+                        if (Objects.equals(o1.getViews(db), o2.getViews(db))) {
+                            return o1.getTitle().compareTo(o2.getTitle());
+                        } else {
+                            return Integer.compare(o2.getViews(db), o1.getViews(db));
+                        }
+                    }
+
+                }).toList();
+        for (Serial serial : sortedShowList) {
+            if (size < number) {
+                showStringList.add(serial.getTitle());
+                size++;
+            } else {
+                break;
+            }
+        }
+        return showStringList;
+    }
+
+    public List<String> activeUsersQuery(Database db) {
+        List<String> userStringList = new ArrayList<>();
+        List<User> userList = new ArrayList<>();
+        int size = 0;
+        for (User user : db.getUserMap().values()) {
+            if (user.getNumberOfRatings() != 0) {
+                userList.add(user);
+            }
+        }
+        List<User> sortedUserList = userList.stream()
+                .sorted((o1, o2) -> {
+                    if (this.getSortType().equals("asc")) {
+                        if (Objects.equals(o1.getNumberOfRatings(), o2.getNumberOfRatings())) {
+                            return o1.getUsername().compareTo(o2.getUsername());
+                        } else {
+                            return Integer.compare(o1.getNumberOfRatings(), o2.getNumberOfRatings());
+                        }
+                    } else {
+                        if (Objects.equals(o1.getNumberOfRatings(), o2.getNumberOfRatings())) {
+                            return o1.getUsername().compareTo(o2.getUsername());
+                        } else {
+                            return Integer.compare(o2.getNumberOfRatings(), o1.getNumberOfRatings());
+                        }
+                    }
+                }).toList();
+        for (User user : sortedUserList) {
+            if (size < number) {
+                userStringList.add(user.getUsername());
+                size++;
+            } else {
+                break;
+            }
+        }
+        return userStringList;
     }
 
     public String getObjectType() {

@@ -24,6 +24,10 @@ public class User {
         this.ratedSerials = new HashMap<>();
     }
 
+    public Integer getNumberOfRatings() {
+        return ratedMovies.size() + ratedSerials.size();
+    }
+
     public String getUsername() {
         return username;
     }

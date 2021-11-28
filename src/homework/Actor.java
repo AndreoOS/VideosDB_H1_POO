@@ -46,7 +46,7 @@ public class Actor {
         return average;
     }
 
-    public boolean hasFilters(Actor actor, Queries q) {
+    public boolean hasFilters(Actor actor, Query q) {
         int count = 0; // numara cate filtre are actor din filter_description
         for(String filter : q.getFilters().get(2)) {
             if (actor.getCareerDescription().contains(filter.toLowerCase(Locale.ROOT))) {
@@ -60,7 +60,7 @@ public class Actor {
         return false;
     }
 
-    public boolean hasAward(Actor actor, Queries q) {
+    public boolean hasAward(Actor actor, Query q) {
         int count = 0; // Numara cate premii din filters are actorul
         for(Map.Entry<ActorsAwards, Integer> entry : actor.getAwards().entrySet()) {
             for (String award : q.getFilters().get(3)) {

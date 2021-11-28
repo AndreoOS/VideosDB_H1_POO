@@ -4,10 +4,10 @@ import fileio.ActionInputData;
 
 import java.util.ArrayList;
 
-public class Commands {
+public class Command {
     private String username;
     private String videoTitle;
-    public Commands(ActionInputData action) {
+    public Command(ActionInputData action) {
         this.username = action.getUsername();
         this.videoTitle = action.getTitle();
     }
