@@ -124,6 +124,17 @@ public class Database {
                         arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
                                 "Query result: " + query.activeUsersQuery(this)));
                     }
+                case Constants.RECOMMENDATION:
+                    Recommendation recommendation = new Recommendation(action);
+                    if (Objects.equals(recommendation.getType(), "standard")) {
+                        if (recommendation.standardRec(this) == null) {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "StandardRecommendation cannot be applied!"));
+                        } else {
+                            arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
+                                    "StandardRecommendation result: " + recommendation.standardRec(this)));
+                        }
+                    }
 
 
             }
