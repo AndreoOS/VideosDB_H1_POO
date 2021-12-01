@@ -158,6 +158,7 @@ public final class Database {
                         arrayResult.add(fileWriter.writeFile(action.getActionId(), "",
                                 "Query result: " + query.activeUsersQuery(this)));
                     }
+
                     break;
                 case Constants.RECOMMENDATION:
                     Recommendation recommendation = new Recommendation(action);
