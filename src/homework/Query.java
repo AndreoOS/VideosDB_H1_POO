@@ -2,16 +2,19 @@ package homework;
 
 import fileio.ActionInputData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.List;
+import java.util.Objects;
 
-public class Query {
+public final class Query {
     private final String objectType;
     private final Integer number;
     private final List<List<String>> filters;
     private final String sortType;
     private final String criteria;
 
-    public Query(ActionInputData action) {
+    public Query(final ActionInputData action) {
         this.objectType = action.getObjectType();
         this.number = action.getNumber();
         this.filters = action.getFilters();
@@ -19,60 +22,96 @@ public class Query {
         this.criteria = action.getCriteria();
     }
 
-    public List<String> averageQuery(Database db) {
-        List<String> actorsList = new ArrayList<>();
+    /**
+     * Method makes a list of all the actors then uses a method that sorts the list by average
+     * rating.
+     * @param db database with actors
+     * @return list of first query.number actors sorted by average
+     */
+    public List<String> averageQuery(final Database db) {
+        List<Actor> actorList = new ArrayList<>();
+        List<String> actorStringList = new ArrayList<>();
         int size = 0;
-        Map<String, Double> unsorted = new HashMap<>();
-        for (Map.Entry<String, Actor> entry : db.getActorMap().entrySet()) {
-            unsorted.put(entry.getKey(), entry.getValue().getAverage(db.getMovieMap(), db.getSerialMap()));
+        for (Actor actor : db.getActorMap().values()) {
+            if (actor.getAverage(db.getMovieMap(), db.getSerialMap()) != 0) {
+                actorList.add(actor);
+            }
         }
-        Map<String, Double> sorted = sortByValue(unsorted);
-        for(Map.Entry<String, Double> entry : sorted.entrySet()) {
+        List<Actor> sortedActorList = sortActorByAverage(actorList, db);
+        for (Actor actor : sortedActorList) {
             if (size < number) {
-                actorsList.add(entry.getKey());
-                size = size + 1;
+                actorStringList.add(actor.getName());
+                size++;
             } else {
                 break;
             }
         }
-        return actorsList;
+        return actorStringList;
     }
 
-    private Map<String, Double> sortByValue(Map<String, Double> unsorted) {
-        List<Map.Entry<String, Double>> list = new LinkedList<>(unsorted.entrySet());
-        list.sort((o1, o2) -> {
-            if (sortType.equals("asc")) {
-                if (Double.compare(o1.getValue(), o2.getValue()) == 0) {
-                    return o1.getKey().compareTo(o2.getKey());
-                } else {
-                    return o1.getValue().compareTo(o2.getValue());
-                }
-            } else {
-                if (Double.compare(o1.getValue(), o2.getValue()) == 0) {
-                    return o2.getKey().compareTo(o1.getKey());
-                } else {
-                    return o2.getValue().compareTo(o1.getValue());
-                }
-            }
-        });
-        HashMap<String, Double> sorted = new LinkedHashMap<>();
-        for (Map.Entry<String, Double> entry : list) {
-            sorted.put(entry.getKey(), entry.getValue());
-        }
-        return sorted;
+    private List<Actor> sortActorByAverage(final List<Actor> actorList, final Database db) {
+        return actorList.stream()
+                .sorted(((o1, o2) -> {
+                    if (sortType.equals("asc")) {
+                        if (Double.compare(o1.getAverage(db.getMovieMap(), db.getSerialMap()),
+                                o2.getAverage(db.getMovieMap(), db.getSerialMap())) == 0) {
+                            return o1.getName().compareTo(o2.getName());
+                        } else {
+                            return Double.compare(o1.getAverage(db.getMovieMap(),
+                                            db.getSerialMap()),
+                                    o2.getAverage(db.getMovieMap(), db.getSerialMap()));
+                        }
+                    } else {
+                        if (Double.compare(o2.getAverage(db.getMovieMap(), db.getSerialMap()),
+                                o1.getAverage(db.getMovieMap(), db.getSerialMap())) == 0) {
+                            return o2.getName().compareTo(o1.getName());
+                        } else {
+                            return Double.compare(o2.getAverage(db.getMovieMap(),
+                                            db.getSerialMap()), o1.getAverage(db.getMovieMap(),
+                                    db.getSerialMap()));
+                        }
+                    }
+                })).toList();
+
     }
 
-    public List<String> awardQuery(Database db) {
+    /**
+     * Method gets all the actors from database, then filters them using streams and
+     * actor method hasAward.
+     * @param db database
+     * @return list of all the names of actors with the wanted awards
+     */
+    public List<String> awardQuery(final Database db) {
         List<Actor> actorList = new ArrayList<>();
         for (Map.Entry<String, Actor> entry : db.getActorMap().entrySet()) {
             actorList.add(entry.getValue());
         }
         actorList = actorList.stream()
-                    .filter(o1 -> o1.hasAward(o1,this)).toList();
+                    .filter(o1 -> o1.hasAward(o1, this)).toList();
+        actorList = sortActorListByAwards(actorList);
         return actorListToString(actorList);
     }
 
-    private List<String> actorListToString(List<Actor> actorList) {
+    private List<Actor> sortActorListByAwards(final List<Actor> actorList) {
+        return actorList.stream()
+                .sorted(((o1, o2) -> {
+                    if (sortType.equals("asc")) {
+                       if (Objects.equals(o1.getNumOfAwards(), o2.getNumOfAwards())) {
+                           return o1.getName().compareTo(o2.getName());
+                       } else {
+                           return Integer.compare(o1.getNumOfAwards(), o2.getNumOfAwards());
+                       }
+                    } else {
+                        if (Objects.equals(o1.getNumOfAwards(), o2.getNumOfAwards())) {
+                            return o2.getName().compareTo(o1.getName());
+                        } else {
+                            return o2.getNumOfAwards().compareTo(o1.getNumOfAwards());
+                        }
+                    }
+                })).toList();
+    }
+
+    private List<String> actorListToString(final List<Actor> actorList) {
         List<String> actorStringList = new ArrayList<>();
         for (Actor a : actorList) {
             actorStringList.add(a.getName());
@@ -80,23 +119,40 @@ public class Query {
         return actorStringList;
     }
 
-    public List<String> filterQuery(Database db) {
-        List<Actor> actorList = new ArrayList<>();
-        for (Map.Entry<String, Actor> entry : db.getActorMap().entrySet()) {
-            actorList.add(entry.getValue());
-        }
+    /**
+     * Method gets all the actors from database, then filters them using streams and
+     * actor method hasFilters. The list is then sorted depending of sortType (ascending or
+     * descending)
+     * @param db database
+     * @return list of actors that have all the filters in their description
+     */
+    public List<String> filterQuery(final Database db) {
+        List<Actor> actorList = new ArrayList<>(db.getActorMap().values());
         actorList = actorList.stream()
-                .filter(o1 -> o1.hasFilters(o1,this)).toList();
+                .filter(o1 -> o1.hasFilters(o1, this)).toList();
+        actorList = actorList.stream()
+                .sorted(((o1, o2) -> {
+                    if (sortType.equals("asc")) {
+                        return o1.getName().compareTo(o2.getName());
+                    } else {
+                        return o2.getName().compareTo(o1.getName());
+                    }
+                })).toList();
         return actorListToString(actorList);
     }
 
 
-
-    public List<String> movieRatingQuery(Database db) {
+    /**
+     * Method creates a list of all the movies with non-zero rating and all the filters.
+     * This list is sorted using streams.
+     * @param db database with all needed info
+     * @return List of first query.number movies sorted by ratings and filters
+     */
+    public List<String> movieRatingQuery(final Database db) {
         int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
-        for(Movie movie : db.getMovieMap().values()) {
+        for (Movie movie : db.getMovieMap().values()) {
             if (movie.getMovieRating() != 0 && movie.hasFilters(this)) {
                 movieList.add(movie);
             }
@@ -128,7 +184,13 @@ public class Query {
         return movieStringList;
     }
 
-    public List<String> showRatingQuery(Database db) {
+    /**
+     * Method creates a list of all the shows with non-zero rating and all the filters.
+     * This list is sorted using streams depending on sortType.
+     * @param db database with all needed info
+     * @return List of first query.number shows sorted by ratings and filters
+     */
+    public List<String> showRatingQuery(final Database db) {
         int size = 0;
         List<String> showStringList = new ArrayList<>();
         List<Serial> showList = new ArrayList<>();
@@ -165,7 +227,13 @@ public class Query {
         return showStringList;
     }
 
-    public List<String> favoriteMovieQuery(Database db) {
+    /**
+     * Method creates a list of all the movies that has the filters and the number of favorites
+     * non-zero. Using streams the list is sorted based on number of favorites and name.
+     * @param db database with all needed info
+     * @return list of first query.number movies sorted by number of favorites
+     */
+    public List<String> favoriteMovieQuery(final Database db) {
         int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
@@ -177,16 +245,20 @@ public class Query {
         List<Movie> sortedMovieList = movieList.stream()
                 .sorted((o1, o2) -> {
                     if (sortType.equals("asc")) {
-                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
+                        if (Objects.equals(o1.getNumberOfFavorites(db),
+                                o2.getNumberOfFavorites(db))) {
                             return o1.getTitle().compareTo(o2.getTitle());
                         } else {
-                            return o1.getNumberOfFavorites(db).compareTo(o2.getNumberOfFavorites(db));
+                            return o1.getNumberOfFavorites(db)
+                                    .compareTo(o2.getNumberOfFavorites(db));
                         }
                     } else {
-                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
+                        if (Objects.equals(o1.getNumberOfFavorites(db),
+                                o2.getNumberOfFavorites(db))) {
                             return o2.getTitle().compareTo(o1.getTitle());
                         } else {
-                            return o2.getNumberOfFavorites(db).compareTo(o1.getNumberOfFavorites(db));
+                            return o2.getNumberOfFavorites(db)
+                                    .compareTo(o1.getNumberOfFavorites(db));
                         }
                     }
                 }).toList();
@@ -201,7 +273,13 @@ public class Query {
         return movieStringList;
     }
 
-    public List<String> longestMovieQuery(Database db) {
+    /**
+     * Method creates list of all the movies that have the query filters, then sorts them using
+     * streams.
+     * @param db database with all the useful info
+     * @return list of first query.number movies sorted by duration
+     */
+    public List<String> longestMovieQuery(final Database db) {
         int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
@@ -238,7 +316,13 @@ public class Query {
 
     }
 
-    public List<String> mostViewedMovieQuery(Database db) {
+    /**
+     * Method creates list of all the movies that have the query filters, then sorts them using
+     * streams by number of views.
+     * @param db database with all useful info
+     * @return list of first query.number movies sorted by views
+     */
+    public List<String> mostViewedMovieQuery(final Database db) {
         int size = 0;
         List<String> movieStringList = new ArrayList<>();
         List<Movie> movieList = new ArrayList<>();
@@ -274,7 +358,13 @@ public class Query {
         return movieStringList;
     }
 
-    public List<String> favoriteShowQuery(Database db) {
+    /**
+     * Method creates a list of all the shows that has the filters and the number of favorites
+     * non-zero. Using streams the list is sorted based on number of favorites and name.
+     * @param db database with all needed info
+     * @return list of first query.number shows sorted by number of favorites
+     */
+    public List<String> favoriteShowQuery(final Database db) {
         int size = 0;
         List<String> showStringList = new ArrayList<>();
         List<Serial> showList = new ArrayList<>();
@@ -286,16 +376,20 @@ public class Query {
         List<Serial> sortedShowList = showList.stream()
                 .sorted((o1, o2) -> {
                     if (sortType.equals("asc")) {
-                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
+                        if (Objects.equals(o1.getNumberOfFavorites(db),
+                                o2.getNumberOfFavorites(db))) {
                             return o1.getTitle().compareTo(o2.getTitle());
                         } else {
-                            return Integer.compare(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db));
+                            return Integer.compare(o1.getNumberOfFavorites(db),
+                                    o2.getNumberOfFavorites(db));
                         }
                     } else {
-                        if (Objects.equals(o1.getNumberOfFavorites(db), o2.getNumberOfFavorites(db))) {
-                            return o1.getTitle().compareTo(o2.getTitle());
+                        if (Objects.equals(o1.getNumberOfFavorites(db),
+                                o2.getNumberOfFavorites(db))) {
+                            return o2.getTitle().compareTo(o1.getTitle());
                         } else {
-                            return Integer.compare(o2.getNumberOfFavorites(db), o1.getNumberOfFavorites(db));
+                            return Integer.compare(o2.getNumberOfFavorites(db),
+                                    o1.getNumberOfFavorites(db));
                         }
                     }
 
@@ -312,12 +406,18 @@ public class Query {
 
     }
 
-    public List<String> longestShowQuery(Database db) {
+    /**
+     * Method creates list of all the show that have the query filters, then sorts them using
+     * streams with duration of the show
+     * @param db database with all the useful info
+     * @return list of first query.number show sorted by duration
+     */
+    public List<String> longestShowQuery(final Database db) {
         int size = 0;
         List<String> showStringList = new ArrayList<>();
         List<Serial> showList = new ArrayList<>();
         for (Serial serial : db.getSerialMap().values()) {
-            if (serial.getNumberOfFavorites(db) != 0 && serial.hasFilters(this)) {
+            if (serial.hasFilters(this)) {
                 showList.add(serial);
             }
         }
@@ -331,7 +431,7 @@ public class Query {
                         }
                     } else {
                         if (Objects.equals(o1.getSerialDuration(), o2.getSerialDuration())) {
-                            return o1.getTitle().compareTo(o2.getTitle());
+                            return o2.getTitle().compareTo(o1.getTitle());
                         } else {
                             return Integer.compare(o2.getSerialDuration(), o1.getSerialDuration());
                         }
@@ -349,12 +449,18 @@ public class Query {
         return showStringList;
     }
 
-    public List<String> mostViewedShowQuery(Database db) {
+    /**
+     * Method creates list of all the shows that have the query filters, then sorts them using
+     * streams by number of views.
+     * @param db database with all useful info
+     * @return list of first query.number shows sorted by views
+     */
+    public List<String> mostViewedShowQuery(final Database db) {
         int size = 0;
         List<String> showStringList = new ArrayList<>();
         List<Serial> showList = new ArrayList<>();
         for (Serial serial : db.getSerialMap().values()) {
-            if (serial.getNumberOfFavorites(db) != 0 && serial.hasFilters(this)) {
+            if (serial.hasFilters(this) && serial.getViews(db) != 0) {
                 showList.add(serial);
             }
         }
@@ -368,7 +474,7 @@ public class Query {
                         }
                     } else {
                         if (Objects.equals(o1.getViews(db), o2.getViews(db))) {
-                            return o1.getTitle().compareTo(o2.getTitle());
+                            return o2.getTitle().compareTo(o1.getTitle());
                         } else {
                             return Integer.compare(o2.getViews(db), o1.getViews(db));
                         }
@@ -386,7 +492,13 @@ public class Query {
         return showStringList;
     }
 
-    public List<String> activeUsersQuery(Database db) {
+    /**
+     * Method creates list of all users that have a non-zero number of rated videos.
+     * This list is then sorted by the number of ratings using streams.
+     * @param db database with all useful info
+     * @return list of first query.number users sorted by number of rated videos
+     */
+    public List<String> activeUsersQuery(final Database db) {
         List<String> userStringList = new ArrayList<>();
         List<User> userList = new ArrayList<>();
         int size = 0;
@@ -401,13 +513,15 @@ public class Query {
                         if (Objects.equals(o1.getNumberOfRatings(), o2.getNumberOfRatings())) {
                             return o1.getUsername().compareTo(o2.getUsername());
                         } else {
-                            return Integer.compare(o1.getNumberOfRatings(), o2.getNumberOfRatings());
+                            return Integer.compare(o1.getNumberOfRatings(),
+                                    o2.getNumberOfRatings());
                         }
                     } else {
                         if (Objects.equals(o1.getNumberOfRatings(), o2.getNumberOfRatings())) {
-                            return o1.getUsername().compareTo(o2.getUsername());
+                            return o2.getUsername().compareTo(o1.getUsername());
                         } else {
-                            return Integer.compare(o2.getNumberOfRatings(), o1.getNumberOfRatings());
+                            return Integer.compare(o2.getNumberOfRatings(),
+                                    o1.getNumberOfRatings());
                         }
                     }
                 }).toList();
